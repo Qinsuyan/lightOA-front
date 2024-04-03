@@ -21,7 +21,7 @@ import { flushSync } from 'react-dom';
 import { createStyles } from 'antd-style';
 import { loginPack } from '@/entities/user';
 import { userLogin } from '@/service/user';
-import { setObjectToLocalStorage } from '@/utils';
+import { setObjectToLocalStorage, getObjectFromLocalStorage } from '@/utils';
 import { KEY_USER_INFO } from '@/entities/localNames';
 const useStyles = createStyles(({ token }) => {
   return {
@@ -67,10 +67,12 @@ const Login: React.FC = () => {
       const user = await userLogin(values);
       if (user.data.token) {
         setObjectToLocalStorage(KEY_USER_INFO, user.data);
-        setInitialState((s) => ({
-          ...s,
-          currentUser: user.data,
-        }));
+        setInitialState({
+          ...initialState,
+          currentUser: user.data
+        }).then((res) => {
+          history.push('/');
+        });
       }
     } catch {
       return undefined;
