@@ -1,23 +1,10 @@
-﻿import type { RequestOptions } from '@@/plugin-request/request';
+﻿import type { AxiosResponse, RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
-import { message, notification } from 'antd';
-
-// 错误处理方案： 错误类型
-enum ErrorShowType {
-  SILENT = 0,
-  WARN_MESSAGE = 1,
-  ERROR_MESSAGE = 2,
-  NOTIFICATION = 3,
-  REDIRECT = 9,
-}
-// 与后端约定的响应数据格式
-interface ResponseStructure {
-  success: boolean;
-  data: any;
-  errorCode?: number;
-  errorMessage?: string;
-  showType?: ErrorShowType;
-}
+import { message } from 'antd';
+import { baseResponse, responsePromptType } from './entities';
+import { KEY_USER_INFO } from './entities/localNames';
+import { getObjectFromLocalStorage } from './utils';
+import { userToken } from './entities/user';
 
 /**
  * @name 错误处理
@@ -28,51 +15,43 @@ export const errorConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
     // 错误抛出
-    errorThrower: (res) => {
-      const { success, data, errorCode, errorMessage, showType } =
-        res as unknown as ResponseStructure;
-      if (!success) {
-        const error: any = new Error(errorMessage);
+    errorThrower: (res: baseResponse<any>) => {
+      if (res.code !== 0) {
+        const error: any = new Error(res.msg);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data };
+        error.info = { msg: res.msg, prompt: res.prompt };
         throw error; // 抛出自制的错误
       }
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
-      if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
+      if (opts?.skipErrorHandler) {
+        throw error;
+      }
       if (error.name === 'BizError') {
-        const errorInfo: ResponseStructure | undefined = error.info;
-        if (errorInfo) {
-          const { errorMessage, errorCode } = errorInfo;
-          switch (errorInfo.showType) {
-            case ErrorShowType.SILENT:
-              // do nothing
-              break;
-            case ErrorShowType.WARN_MESSAGE:
-              message.warning(errorMessage);
-              break;
-            case ErrorShowType.ERROR_MESSAGE:
-              message.error(errorMessage);
-              break;
-            case ErrorShowType.NOTIFICATION:
-              notification.open({
-                description: errorMessage,
-                message: errorCode,
-              });
-              break;
-            case ErrorShowType.REDIRECT:
-              // TODO: redirect
-              break;
-            default:
-              message.error(errorMessage);
+        if (error.info) {
+          const info: Partial<baseResponse<void>> = error.info;
+          if (info.prompt) {
+            switch (info.prompt) {
+              case responsePromptType.err:
+                message.error(info.msg);
+                break;
+              case responsePromptType.warn:
+                message.warning(info.msg);
+                break;
+              case responsePromptType.info:
+                message.info(info.msg);
+                break;
+            }
           }
         }
       } else if (error.response) {
         // Axios 的错误
-        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
+        if (error.response.data.msg) {
+          message.error('操作失败：' + error.response.data.msg);
+        } else {
+          message.error('操作失败');
+        }
       } else if (error.request) {
         // 请求已经成功发起，但没有收到响应
         // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
@@ -88,20 +67,31 @@ export const errorConfig: RequestConfig = {
   // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
-      const url = config?.url?.concat('?token = 123');
-      return { ...config, url };
+      if (window.location.href.indexOf('/login') > -1) {
+        return config;
+      }
+      const userInfo = getObjectFromLocalStorage<userToken>(KEY_USER_INFO);
+
+      if (userInfo?.token) {
+        config.headers!['LTOAToken'] = userInfo.token;
+        return config;
+      } else {
+        if (config.url!.indexOf('/login') > -1) {
+          return config;
+        }
+        window.location.replace('/login');
+        return config;
+      }
     },
   ],
 
   // 响应拦截器
   responseInterceptors: [
-    (response) => {
-      // 拦截响应数据，进行个性化处理
-      const { data } = response as unknown as ResponseStructure;
-
-      if (data?.success === false) {
-        message.error('请求失败！');
+    (response: AxiosResponse) => {
+      if (response.data?.prompt === responsePromptType.success) {
+        if (response.data?.msg) {
+          message.success(response.data?.msg);
+        }
       }
       return response;
     },

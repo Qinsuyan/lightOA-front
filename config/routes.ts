@@ -1,8 +1,8 @@
 export default [
   {
-    path: '/user',
+    path: '/login',
     layout: false,
-    routes: [{ name: '登录', path: '/user/login', component: './User/Login' }],
+    component: './User/Login',
   },
   { path: '/welcome', name: '欢迎', icon: 'smile', component: './Welcome' },
   { path: '/doc', name: '文档', icon: 'file', component: './Doc' },
