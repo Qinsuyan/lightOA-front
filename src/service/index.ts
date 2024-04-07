@@ -45,6 +45,7 @@ export function del<T = undefined>(url: string, params?: paramsType): Promise<ba
     params,
   });
 }
+
 export function callProTableData<T>(
   service: (params: any) => Promise<baseResponse<{ list: T[]; total: number }>>,
   onFail?: (m: string) => void,
