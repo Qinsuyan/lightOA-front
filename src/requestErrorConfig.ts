@@ -5,12 +5,12 @@ import { baseResponse, responsePromptType } from './entities';
 import { KEY_USER_INFO } from './entities/localNames';
 import { getObjectFromLocalStorage } from './utils';
 import { userToken } from './entities/user';
-
 /**
  * @name 错误处理
  * pro 自带的错误处理， 可以在这里做自己的改动
  * @doc https://umijs.org/docs/max/request#配置
  */
+
 export const errorConfig: RequestConfig = {
   // 错误处理： umi@3 的错误处理方案。
   errorConfig: {
@@ -63,7 +63,6 @@ export const errorConfig: RequestConfig = {
       }
     },
   },
-
   // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
@@ -71,7 +70,6 @@ export const errorConfig: RequestConfig = {
         return config;
       }
       const userInfo = getObjectFromLocalStorage<userToken>(KEY_USER_INFO);
-
       if (userInfo?.token) {
         config.headers!['LTOAToken'] = userInfo.token;
         return config;
@@ -84,7 +82,6 @@ export const errorConfig: RequestConfig = {
       }
     },
   ],
-
   // 响应拦截器
   responseInterceptors: [
     (response: AxiosResponse) => {

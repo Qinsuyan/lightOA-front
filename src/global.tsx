@@ -16,14 +16,12 @@ const clearCache = () => {
       .catch((e) => console.log(e));
   }
 };
-
 // if pwa is true
 if (pwa) {
   // Notify user if offline now
   window.addEventListener('sw.offline', () => {
     message.warning('当前处于离线状态');
   });
-
   // Pop up a prompt on the page asking the user if they want to use the latest version
   window.addEventListener('sw.updated', (event: Event) => {
     const e = event as CustomEvent;
@@ -76,6 +74,7 @@ if (pwa) {
     });
   });
 } else if ('serviceWorker' in navigator && isHttps) {
+  //web worker
   // unregister service worker
   const { serviceWorker } = navigator;
   if (serviceWorker.getRegistrations) {

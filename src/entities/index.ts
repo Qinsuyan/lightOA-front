@@ -2,6 +2,7 @@ export interface pageFilter {
   index: number; //当前页码
   size: number; //每页条数
 }
+
 export type pageData<T> = {
   total: number; //总条数
   list: T[]; //数据
