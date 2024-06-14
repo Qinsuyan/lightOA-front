@@ -28,6 +28,9 @@ npm run dev
   * 计划报销月份
   * 图表（echarts）汇总
   * 按月打包所有文件并提供下载
+* Terminal
+  * 保存ssh地址和密码（全公司共享，带权限）
+  * 网页直接操作
 * 文档管理
   * 计划支持：
     * 查看 PDF、Excel、CSV、Word、markdown、cad（dxf格式）、图片（jpeg、png、svg）、json（格式化，带长度限制）、sgy（自动判断大小端、浮点数类型）、txt
