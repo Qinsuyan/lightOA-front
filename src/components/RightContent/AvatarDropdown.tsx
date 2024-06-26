@@ -1,11 +1,10 @@
-
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
 import { Spin } from 'antd';
 import { createStyles } from 'antd-style';
 import { stringify } from 'querystring';
 import type { MenuInfo } from 'rc-menu/lib/interface';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
 import { userLogout } from '@/service/user';
@@ -45,7 +44,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
    * 退出登录，并且将当前的 url 保存
    */
   const loginOut = async () => {
-    localStorage.removeItem(KEY_USER_INFO)
+    localStorage.removeItem(KEY_USER_INFO);
     await userLogout();
     const { search, pathname } = window.location;
     const urlParams = new URL(window.location.href).searchParams;

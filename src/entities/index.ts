@@ -1,6 +1,6 @@
 export interface listFilter {
-  index: number; //当前页码
-  size: number; //每页条数
+  index?: number; //当前页码
+  size?: number; //每页条数
 }
 
 export type listData<T> = {
@@ -21,3 +21,5 @@ export type baseResponse<T> = {
   data: T; //数据
   code: number;
 };
+
+export type sortOption = 'desc' | 'asc';

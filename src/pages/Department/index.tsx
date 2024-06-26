@@ -134,7 +134,6 @@ const Department: React.FC = () => {
       },
     });
   };
-
   return (
     <>
       <ProTable
