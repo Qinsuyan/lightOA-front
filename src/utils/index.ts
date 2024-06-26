@@ -25,3 +25,14 @@ export const setObjectToLocalStorage = (key: string, value: any) => {
   // 将JSON字符串存储到localStorage中
   localStorage.setItem(key, jsonValue);
 };
+
+export const dateTimeRender = (t: number | string) => {
+  const d = new Date(t);
+  return `${d.getFullYear()}-${fixZero(d.getMonth() + 1)}-${fixZero(d.getDate())} ${fixZero(
+    d.getHours(),
+  )}:${fixZero(d.getMinutes())}:${fixZero(d.getSeconds())}`;
+};
+
+const fixZero = (val: number) => {
+  return val > 9 ? val : '0' + val;
+};

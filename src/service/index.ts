@@ -1,4 +1,4 @@
-import { baseResponse, pageFilter } from '@/entities';
+import { baseResponse, listFilter } from '@/entities';
 import { request } from '@umijs/max';
 import { isArray } from 'lodash';
 
@@ -50,23 +50,23 @@ export function callProTableData<T>(
   service: (params: any) => Promise<baseResponse<{ list: T[]; total: number }>>,
   onFail?: (m: string) => void,
 ) {
-  return (params: pageFilter, sorter = {}, filter = {}) => {
-    const { index, size, ...rest } = params;
+  return (params: any, sorter = {}, filter = {}) => {
+    const { current, pageSize, ...rest } = params;
     return service({
-      index,
-      size,
+      index: current,
+      size: pageSize,
       ...rest,
       ...getProSorter(sorter),
       ...filter,
     }).then(({ code, msg, data }) => {
-      if (code !== 0 && onFail) {
+      if (code !== 200 && onFail) {
         onFail(msg);
       }
       const { list, total } = data || {};
       return {
         data: list,
         total,
-        success: code === 0,
+        success: code === 200,
       };
     });
   };
