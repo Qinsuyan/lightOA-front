@@ -36,3 +36,76 @@ export const dateTimeRender = (t: number | string) => {
 const fixZero = (val: number) => {
   return val > 9 ? val : '0' + val;
 };
+
+export const getNode = (id: number, tree: any[]): any => {
+  for (let i = 0; i < tree.length; i++) {
+    if (tree[i].id === id) {
+      return tree[i];
+    }
+  }
+  for (let i = 0; i < tree.length; i++) {
+    if (tree[i].children?.length) {
+      const node = getNode(id, tree[i].children);
+      if (node) {
+        return node;
+      }
+    }
+  }
+  return null;
+};
+
+type TreeNode = {
+  id: number;
+  children: TreeNode[];
+} & any;
+export const findSubTree = (tree: TreeNode[], idArray: number[]): TreeNode[] => {
+  const idSet = new Set(idArray);
+  const result: TreeNode[] = [];
+
+  const traverse = (node: TreeNode): TreeNode | null => {
+    if (idSet.has(node.id)) {
+      const newNode: TreeNode = { ...node, children: [] };
+      if (node.children?.length) {
+        node.children.forEach((child: any) => {
+          const subtree = traverse(child);
+          if (subtree) {
+            newNode.children.push(subtree);
+          }
+        });
+      }
+
+      return newNode;
+    } else {
+      const children: TreeNode[] = node.children
+        ?.map((child: any) => traverse(child))
+        ?.filter((child: null): child is TreeNode => child !== null);
+
+      if (children?.length) {
+        return { ...node, children };
+      }
+    }
+    return null;
+  };
+
+  tree.forEach((node) => {
+    const subtree = traverse(node);
+    if (subtree) {
+      result.push(subtree);
+    }
+  });
+
+  return result;
+};
+
+export const findSubTreeIds = (tree: TreeNode[]): number[] => {
+  const result: number[] = [];
+  tree.forEach((node) => {
+    //result.push(node.id);
+    if (node.children?.length) {
+      result.push(...findSubTreeIds(node.children));
+    }else{
+      result.push(node.id);
+    }
+  });
+  return result;
+};

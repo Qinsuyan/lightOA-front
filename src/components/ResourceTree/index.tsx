@@ -1,14 +1,30 @@
 import { resource } from '@/entities/role';
+import { findSubTree, findSubTreeIds } from '@/utils';
 import { useModel } from '@umijs/max';
 import { Button, Modal, Spin, Tree } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-const ResourceTree: React.FC<{ checked: resource[]; readonly?: boolean }> = (props) => {
+const ResourceTree: React.FC<{
+  value?: resource[];
+  readonly?: boolean;
+  onChange?: (val: resource[]) => any;
+}> = (props) => {
   const { allResources } = useModel('resource');
   const [showResourceModal, setShowResourceModal] = useState(false);
+  const [checkedKeys, setCheckedKeys] = useState<number[]>([]);
   const handleViewResources = () => {
     setShowResourceModal(true);
   };
+  const handleCheck = (checkedKeys: any) => {
+    const sub = findSubTree([allResources], checkedKeys);
+    props.onChange?.(sub);
+  };
+  useEffect(() => {
+    if (!props.readonly && props.value) {
+      const keys = findSubTreeIds(props.value);
+      setCheckedKeys(keys);
+    }
+  }, [props.value]);
   if (!allResources) {
     return <Spin />;
   }
@@ -28,7 +44,7 @@ const ResourceTree: React.FC<{ checked: resource[]; readonly?: boolean }> = (pro
           <Tree
             defaultExpandAll
             fieldNames={{ title: 'name', key: 'id' }}
-            treeData={props.checked !== null ? props.checked : [allResources as any]}
+            treeData={props.value !== null ? props.value : [allResources as any]}
           />
         </Modal>
       </>
@@ -37,11 +53,14 @@ const ResourceTree: React.FC<{ checked: resource[]; readonly?: boolean }> = (pro
   return (
     <Tree
       fieldNames={{ title: 'name', key: 'id' }}
+      checkable
+      onCheck={handleCheck}
+      checkedKeys={checkedKeys}
       treeData={
-        props.readonly
+        !props.readonly
           ? [allResources as any]
-          : props.checked !== null
-          ? props.checked
+          : props.value !== null
+          ? props.value
           : [allResources]
       }
     />
